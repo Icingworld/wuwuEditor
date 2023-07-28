@@ -71,17 +71,16 @@ login::login(QWidget *parent) :
                 note->setAlignment(Qt::AlignHCenter);
                 ui->bookListLayout->insertWidget(0, note);
             } else {
-                // 点击第一个
                 QMouseEvent * mouseEvent = new QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
                 ptr->mousePressEvent(mouseEvent);
             }
             if (allCompleted)
             {
-                QPushButton * addBook = new QPushButton("+", this);
-                ui->bookListLayout->insertWidget(0, addBook);
-                connect(addBook, &QPushButton::clicked, this, &login::toAdd);
                 ui->stackedWidget->setCurrentIndex(1);
             }
+            QPushButton * addBook = new QPushButton("+", this);
+            ui->bookListLayout->insertWidget(0, addBook);
+            connect(addBook, &QPushButton::clicked, this, &login::toAdd);
         }
     }
 }
@@ -89,6 +88,7 @@ login::login(QWidget *parent) :
 login::~login()
 {
     delete ui;
+    db.close();
 }
 
 void login::select(const QString & name, const QString & count, const QString & state, const QString & cover)
@@ -116,6 +116,10 @@ void login::toAdd()
 void login::on_createBookButton_clicked()
 {
     QString newName = ui->newBookName->text();
+    if (newName == "")
+    {
+        return;
+    }
     QSqlQuery query = db.query();
     query.prepare("INSERT INTO book (name, count, state) VALUES (:name, 0, 0);");
     query.bindValue(":name", newName);

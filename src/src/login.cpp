@@ -64,7 +64,6 @@ login::login(QWidget *parent) :
                 connect(newBlock, &NovelBlock::sendSignal, this, &login::getSignal);
                 ptr = newBlock;
             }
-            qDebug() << ui->bookListLayout->count();
             if (ui->bookListLayout->count() <= 1 || ptr == nullptr)
             {
                 QLabel * note = new QLabel("还没有进行创作", this);
@@ -113,6 +112,14 @@ void login::toAdd()
     ui->stackedWidget->setCurrentIndex(1);
 }
 
+void login::createDir(const QString & path)
+{
+    QDir dataDir(path);
+    if (!dataDir.exists()) {
+        dataDir.mkpath(".");
+    }
+}
+
 void login::on_createBookButton_clicked()
 {
     QString newName = ui->newBookName->text();
@@ -124,10 +131,13 @@ void login::on_createBookButton_clicked()
     query.prepare("INSERT INTO book (name, count, state) VALUES (:name, 0, 0);");
     query.bindValue(":name", newName);
     query.exec();
-    QDir dataDir("data/book/" + newName);
-    if (!dataDir.exists()) {
-        dataDir.mkpath(".");
-    }
+    createDir("data/book/" + newName);
+    createDir("data/book/" + newName + "/chapter");
+    createDir("data/book/" + newName + "/note");
+    createDir("data/book/" + newName + "/chapterNote");
+    createDir("data/book/" + newName + "/output");
+    createDir("data/book/" + newName + "/output/txt");
+    createDir("data/book/" + newName + "/output/markdown");
     launchMainWindow(newName);
 }
 
@@ -147,6 +157,8 @@ void login::launchMainWindow(const QString & name)
     dbBook.setFile("data/book/" + name + "/book.db");
     if (dbBook.open())
     {
+        QSqlQuery query = dbBook.query();
+        query.exec("CREATE TABLE IF NOT EXISTS content (chapter TEXT NOT NULL, count INTEGER NOT NULL, state INTEGER NOT NULL);");
         // launch MainWindow
         MainWindow * m = new MainWindow(dbBook);
         m->show();

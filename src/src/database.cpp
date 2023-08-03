@@ -21,6 +21,10 @@ void Database::setFile(const QString & DATABASE_NAME)
 
 bool Database::open()
 {
+    if (DATABASE.isOpen())
+    {
+        return true;
+    }
     if (DATABASE.open())
     {
         qDebug() << "open database successfully";

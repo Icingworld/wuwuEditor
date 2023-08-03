@@ -62,6 +62,7 @@ public:
     ~login();
     void select(const QString & name, const QString & count, const QString & state, const QString & cover);
     void launchMainWindow(const QString & name);
+    void createDir(const QString & path);
     Database db{};
     QString selectName{};
 
